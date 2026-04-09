@@ -1,0 +1,4 @@
+node_modules/
+Honeypot.log
+Honeypot_chain.json
+.DS_Store

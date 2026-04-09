@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecureNet Banking — Sign In</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Bank header bar ── */
+    .bank-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: #1a2e40;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+      z-index: 10;
+    }
+    .bank-header .logo { font-size: 1.6rem; }
+    .bank-header .name {
+      color: #e8f4fd;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .bank-header .tagline {
+      color: #7fb3d3;
+      font-size: 0.75rem;
+      margin-top: 2px;
+    }
+    .bank-header .secure-badge {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #4ecb71;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* ── Login card ── */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 44px 48px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .card h2 {
+      text-align: center;
+      color: #1a2e40;
+      font-size: 1.4rem;
+      margin-bottom: 6px;
+    }
+    .card .subtitle {
+      text-align: center;
+      color: #7f8c9a;
+      font-size: 0.85rem;
+      margin-bottom: 32px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+      margin-top: 18px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 7px;
+      font-size: 0.95rem;
+      color: #111;
+      background: #f9fafb;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    input:focus {
+      border-color: #2c7be5;
+      box-shadow: 0 0 0 3px rgba(44,123,229,0.15);
+      background: #fff;
+    }
+
+    .forgot {
+      display: block;
+      text-align: right;
+      font-size: 0.78rem;
+      color: #2c7be5;
+      margin-top: 6px;
+      text-decoration: none;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      margin-top: 28px;
+      padding: 13px;
+      background: linear-gradient(90deg, #1d5fa8, #2c7be5);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    button[type="submit"]:hover  { opacity: 0.92; }
+    button[type="submit"]:active { transform: scale(0.98); }
+
+    .divider {
+      text-align: center;
+      color: #adb5bd;
+      font-size: 0.78rem;
+      margin: 22px 0 16px;
+      position: relative;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 38%;
+      height: 1px;
+      background: #e5e7eb;
+    }
+    .divider::before { left: 0; }
+    .divider::after  { right: 0; }
+
+    .register-link {
+      display: block;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #374151;
+    }
+    .register-link a { color: #2c7be5; text-decoration: none; font-weight: 600; }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 28px;
+      color: #7fb3d3;
+      font-size: 0.75rem;
+      text-align: center;
+    }
+    footer a { color: #a8cfe8; text-decoration: none; margin: 0 8px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="bank-header">
+    <span class="logo">🏦</span>
+    <div>
+      <div class="name">SecureNet Banking</div>
+      <div class="tagline">Your trusted financial partner since 2005</div>
+    </div>
+    <div class="secure-badge">🔒 256-bit SSL Secured</div>
+  </div>
+
+  <!-- Login form -->
+  <div class="card">
+    <h2>Welcome back</h2>
+    <p class="subtitle">Sign in to your account to continue</p>
+
+    <form method="POST" action="/login" autocomplete="off">
+      <label for="username">Customer ID / Username</label>
+      <input type="text" id="username" name="username"
+             placeholder="Enter your Customer ID" required>
+
+      <label for="password">Password / MPIN</label>
+      <input type="password" id="password" name="password"
+             placeholder="Enter your password" required>
+      <a href="#" class="forgot">Forgot password?</a>
+
+      <button type="submit">Sign In Securely →</button>
+    </form>
+
+    <div class="divider">or</div>
+    <span class="register-link">New customer? <a href="#">Open an account</a></span>
+  </div>
+
+  <footer>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms & Conditions</a>
+    <a href="#">Security Tips</a>
+    <br><br>
+    © 2025 SecureNet Banking Corporation. All rights reserved.
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

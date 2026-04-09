@@ -1,0 +1,17 @@
+{
+  "name": "honeypot-v2",
+  "version": "2.0.0",
+  "description": "A blockchain-backed HTTP honeypot that captures and logs intrusion attempts.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["honeypot", "security", "blockchain", "intrusion-detection"],
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "geoip-lite": "^1.4.10",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1"
+  }
+}

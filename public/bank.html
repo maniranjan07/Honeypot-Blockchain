@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecureNet Banking — Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1a2e40;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(90deg, #1a2e40, #1d5fa8);
+      color: #fff;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      height: 62px;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+    header .logo  { font-size: 1.8rem; }
+    header .title { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.3px; }
+    header .user  { margin-left: auto; font-size: 0.85rem; opacity: 0.85; }
+    header .logout {
+      margin-left: 18px;
+      padding: 6px 14px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 5px;
+      color: #fff;
+      font-size: 0.8rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 960px;
+      margin: 32px auto;
+      padding: 0 20px;
+    }
+
+    /* ── Balance card ── */
+    .balance-card {
+      background: linear-gradient(135deg, #1d5fa8, #2c7be5);
+      color: #fff;
+      border-radius: 12px;
+      padding: 28px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      box-shadow: 0 8px 24px rgba(44,123,229,0.35);
+      margin-bottom: 28px;
+    }
+    .balance-card .label { font-size: 0.85rem; opacity: 0.8; margin-bottom: 6px; }
+    .balance-card .amount {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .balance-card .acct  { font-size: 0.8rem; opacity: 0.7; margin-top: 6px; }
+    .balance-card .badge {
+      background: rgba(255,255,255,0.2);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* ── Quick actions ── */
+    .actions {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .action-btn {
+      flex: 1;
+      min-width: 140px;
+      background: #fff;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 18px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .action-btn:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); border-color: #2c7be5; }
+    .action-btn .icon { font-size: 1.6rem; margin-bottom: 6px; }
+    .action-btn .text { font-size: 0.82rem; font-weight: 600; color: #374151; }
+
+    /* ── Transactions ── */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a2e40;
+      margin-bottom: 14px;
+    }
+
+    .tx-card {
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead tr { background: #f8fafc; }
+    th {
+      padding: 12px 16px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: left;
+      border-bottom: 1.5px solid #e5e7eb;
+    }
+    td {
+      padding: 13px 16px;
+      font-size: 0.88rem;
+      border-bottom: 1px solid #f3f4f6;
+      color: #374151;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+
+    .credit  { color: #16a34a; font-weight: 600; }
+    .debit   { color: #dc2626; font-weight: 600; }
+    .pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .pill-green { background: #dcfce7; color: #16a34a; }
+    .pill-blue  { background: #dbeafe; color: #1d4ed8; }
+
+    /* ── Alert banner ── */
+    .alert {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: 12px 18px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: #92400e;
+      margin-bottom: 22px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 28px;
+      color: #9ca3af;
+      font-size: 0.78rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="logo">🏦</span>
+    <span class="title">SecureNet Banking</span>
+    <span class="user">👤 Welcome, Valued Customer</span>
+    <a href="/login" class="logout">Sign Out</a>
+  </header>
+
+  <div class="container">
+
+    <!-- Session notice -->
+    <div class="alert">
+      ⚠ Your session is active. For your security, you will be logged out after 10 minutes of inactivity.
+    </div>
+
+    <!-- Balance card -->
+    <div class="balance-card">
+      <div>
+        <div class="label">Available Balance</div>
+        <div class="amount">₹ 4,52,350.00</div>
+        <div class="acct">A/C No: XXXX XXXX 8821 &nbsp;|&nbsp; Savings Account</div>
+      </div>
+      <span class="badge">✅ Active</span>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="actions">
+      <div class="action-btn"><div class="icon">💸</div><div class="text">Fund Transfer</div></div>
+      <div class="action-btn"><div class="icon">📱</div><div class="text">UPI Payment</div></div>
+      <div class="action-btn"><div class="icon">💳</div><div class="text">Card Services</div></div>
+      <div class="action-btn"><div class="icon">📑</div><div class="text">Statement</div></div>
+      <div class="action-btn"><div class="icon">📞</div><div class="text">Support</div></div>
+    </div>
+
+    <!-- Recent transactions -->
+    <div class="section-title">Recent Transactions</div>
+    <div class="tx-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Reference</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>01 Apr 2026</td>
+            <td>NEFT — ABC Enterprises Ltd.</td>
+            <td>NEFT2604010042</td>
+            <td class="debit">−₹ 18,500</td>
+            <td><span class="pill pill-green">Completed</span></td>
+          </tr>
+          <tr>
+            <td>31 Mar 2026</td>
+            <td>Salary Credit — XYZ Corp</td>
+            <td>IMPS3103220198</td>
+            <td class="credit">+₹ 65,000</td>
+            <td><span class="pill pill-green">Completed</span></td>
+          </tr>
+          <tr>
+            <td>29 Mar 2026</td>
+            <td>ATM Withdrawal — Sector 12</td>
+            <td>ATM2903991234</td>
+            <td class="debit">−₹ 10,000</td>
+            <td><span class="pill pill-green">Completed</span></td>
+          </tr>
+          <tr>
+            <td>27 Mar 2026</td>
+            <td>UPI — 9876543210@upi</td>
+            <td>UPI27039871122</td>
+            <td class="debit">−₹ 3,200</td>
+            <td><span class="pill pill-green">Completed</span></td>
+          </tr>
+          <tr>
+            <td>25 Mar 2026</td>
+            <td>LIC Premium Auto-debit</td>
+            <td>ECS2503LIC7712</td>
+            <td class="debit">−₹ 5,750</td>
+            <td><span class="pill pill-blue">Processed</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <footer>
+    © 2026 SecureNet Banking Corporation. All rights reserved. &nbsp;|&nbsp;
+    FDIC Insured &nbsp;|&nbsp; Equal Housing Lender
+  </footer>
+
+</body>
+</html>
