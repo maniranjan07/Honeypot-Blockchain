@@ -10,6 +10,8 @@ even if someone breaks in and tries to delete the evidence — they can't,
 because tampering with any record breaks the entire chain and gets detected 
 immediately.
 
+![Honeypot Login Page](screenshots/login.png)
+
 ---
 
 ## Why I Built This
