@@ -1,109 +1,123 @@
-# 🍯 Honeypot v2 — Blockchain-Backed Intrusion Logger
+# 🍯 Honeypot — Blockchain Intrusion Logger
 
-A Node.js honeypot server that masquerades as a bank login portal, captures every credential attempt and probe in a **tamper-evident blockchain**, and exposes several analysis endpoints for defenders.
+A cybersecurity project I built to understand how attackers behave when 
+they try to break into systems. It's a fake bank login page that looks 
+real — but behind the scenes, it records everything the attacker does.
+
+What makes it different from a normal log file is that I store all the 
+captured data in a **custom blockchain I built from scratch**. This means 
+even if someone breaks in and tries to delete the evidence — they can't, 
+because tampering with any record breaks the entire chain and gets detected 
+immediately.
+
+---
+
+## Why I Built This
+
+I wanted to understand two things practically:
+1. How do real attackers probe and attack web systems?
+2. How does blockchain actually work at the code level — not just theory?
+
+This project combines both. It's not just a toy — honeypots are actually 
+used by banks, government agencies, and security researchers in the real world.
+
+---
+
+## What It Does
+
+When someone visits `/login` they see a convincing bank login page 
+(SecureNet Banking). The moment they type credentials and hit Sign In:
+
+- Their **username and password** are captured
+- Their **IP address** is recorded
+- Their **location** is looked up (country, city, coordinates) using GeoIP
+- Their **browser, OS, and all HTTP headers** are saved
+- A **new block is mined** and added to the blockchain
+- They get redirected to a fake bank dashboard — they think they're in 😄
+
+Even if someone just visits a random URL like `/admin` or `/.env` — that 
+probe is also captured and logged. Automated scanners don't get away either.
 
 ---
 
 ## Project Structure
-
-```
-honeypot-v2/
-├── server.js           ← Express app — main entry point
-├── block.js            ← Block class (SHA-256, Proof-of-Work)
-├── blockchain.js       ← Blockchain class (append, validate, stats)
+honey/
+├── server.js         → Express server, all routes and logic
+├── block.js          → Block class with SHA-256 hashing + Proof of Work
+├── blockchain.js     → Chain management, validation, stats
 ├── package.json
-├── honeypot.log        ← Runtime: raw NDJSON log (auto-created)
-├── honeypot_chain.json ← Runtime: persisted blockchain (auto-created)
 └── public/
-    ├── login.html      ← Fake bank login page (lure)
-    ├── bank.html       ← Fake bank dashboard (shown after login)
-    └── script.js       ← Minimal client JS
-```
+├── login.html    → Fake bank login page
+├── bank.html     → Fake dashboard (shown after login)
+└── script.js     → Minimal client JS
 
 ---
 
-## How It Works
+## The Blockchain Part
 
-### 1. The Lure (`/login`)
-A convincing bank login page (SecureNet Banking) is served. No real authentication ever occurs.
+I didn't use any blockchain library — I built it from scratch using 
+Node's built-in `crypto` module.
 
-### 2. Capture (`POST /login`)
-When an attacker submits credentials, the server captures:
-- Username and password typed
-- Client IP address (with proxy-header support)
-- Full HTTP request headers
-- GeoIP data (country, city, region, timezone, lat/long)
-- Timestamp
+Each **Block** stores:
+- The captured attack data
+- A SHA-256 hash of all its contents
+- The previous block's hash (this is what links them)
+- A nonce (used during mining)
 
-### 3. Dual Logging
-Every captured event is written to **two** places:
-- `honeypot.log` — a flat NDJSON file for quick `grep`/`jq` analysis
-- The **blockchain** — each event is mined into a new block, then persisted to `honeypot_chain.json`
+**Proof of Work:** Before a block gets added, it has to be *mined* — 
+meaning the computer keeps hashing with an incrementing nonce until 
+the hash starts with `"00"`. This makes replacing old blocks expensive.
 
-### 4. Catch-All Probe Logging
-Any request to an unrecognised path (e.g. `GET /.env`, `GET /admin`) is also captured and logged as a **probe** event, revealing automated scanner behaviour.
-
-### 5. Analysis Endpoints (for the defender)
-
-| Endpoint      | Description                                  |
-|---------------|----------------------------------------------|
-| `GET /chain`  | Full blockchain as JSON                      |
-| `GET /validate` | Returns whether the chain is intact        |
-| `GET /stats`  | Block count, top attacker IPs, login count   |
-| `GET /logs?limit=N` | Last N login attempts (newest first)   |
+**Tamper detection:** `isChainValid()` re-hashes every block and checks 
+every link. Change even one character in an old log entry — the hash 
+breaks, the chain breaks, tamper is detected instantly.
 
 ---
 
-## Blockchain Design
-
-### `block.js`
-Each `Block` contains:
-- `index` — position in chain
-- `timestamp` — ISO-8601 creation time
-- `data` — array of log entries
-- `previousHash` — SHA-256 hash of the previous block
-- `nonce` — incremented during Proof-of-Work mining
-- `hash` — SHA-256 of all above fields
-
-**Proof-of-Work:** `mineBlock(difficulty)` increments the nonce until the hash starts with `difficulty` zero characters (default: 2). This prevents trivial block substitution.
-
-### `blockchain.js`
-- Genesis block is created automatically on startup
-- `addBlock(block)` links the new block to the chain tip, mines it, then pushes it
-- `isChainValid()` re-computes every block's hash and checks each `previousHash` link — any tampering is detected immediately
-- `getStats()` returns a summary object
-
----
-
-## Setup & Running
+## How to Run
 
 ```bash
-cd honeypot-v2
+cd honey
 npm install
-npm start
+node server.js
 ```
 
-Then visit `http://localhost:3000/login`.
+Then open: `http://localhost:3000/login`
+
+| Endpoint | What it shows |
+|----------|---------------|
+| `/login` | Fake bank login (the lure) |
+| `/bank` | Fake dashboard |
+| `/chain` | Full blockchain data |
+| `/validate` | Is the chain tampered? |
+| `/stats` | Total attacks, top IPs |
+| `/logs` | Recent login attempts |
 
 ---
 
-## Improvements Over v1
+## Tech Stack
 
-| Feature | v1 | v2 |
-|---------|----|----|
-| Security headers | ❌ | ✅ helmet |
-| Real IP extraction (proxy-aware) | ❌ | ✅ |
-| Probe logging (all unknown paths) | ✅ | ✅ (with event type) |
-| Blockchain field name | `logs` | `data` (clearer) |
-| Stats endpoint | ❌ | ✅ `/stats` |
-| Logs endpoint | ❌ | ✅ `/logs?limit=N` |
-| Validate returns JSON | ❌ | ✅ |
-| Code comments | Sparse | Full JSDoc |
-| Login page design | Basic | Convincing bank UI |
-| Dashboard design | Basic | Polished cards + table |
+- **Node.js + Express** — server
+- **SHA-256 (crypto module)** — hashing
+- **Proof of Work** — block mining
+- **geoip-lite** — offline IP geolocation
+- **Helmet.js** — HTTP security headers
+- **Morgan** — HTTP request logging
+
+---
+
+## What I Learned
+
+- How honeypots work and why they're used in real security operations
+- Blockchain internals — hashing, linking, Proof of Work — all from scratch
+- How attackers behave: credential stuffing, path probing, scanner patterns
+- Node.js middleware architecture and Express routing
+- Forensic data collection: GeoIP, HTTP headers, browser fingerprinting
 
 ---
 
 ## Disclaimer
 
-This tool is intended for **educational purposes and authorised security research only**. Deploy it only on systems you own or have explicit permission to monitor. Never use it to capture credentials from real, unsuspecting users.
+This is built for **learning and research purposes only**. 
+Run it only on your own machine or systems you have permission to monitor.
+Never deploy this to capture credentials from real users.
